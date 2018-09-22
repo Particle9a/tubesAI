@@ -58,8 +58,9 @@ objListW = []
 objListB = []
 
 #Membuat List Objek
-for x in range(0,8):
-	inp = input().split()
+fil = open('input chess.txt')
+for inp in fil :
+	inp = inp.split()
 	if (inp[0] == 'WHITE'):
 		for y in range(0,int(inp[2])):
 			posX = 0
@@ -185,6 +186,7 @@ def hillClimbS1(takenPos,whiteList) :
 		if (tempState['Cost'] < minState['Cost']):
 			minState = tempState
 			betterExist = True
+		print("Solution :")
 		displayPapan(minState['Positions'], minState['White'],[])
 		print(minState['Cost'])				
 
@@ -202,8 +204,10 @@ def hillClimbS2(takenPos,whiteList,blackList) :
 		if (tempState['Cost'] < minState['Cost']):
 			minState = tempState
 			betterExist = True
+		print("Solution :")
 		displayPapan(minState['Positions'], minState['White'],minState['Black'])
 		print(minState['Cost'])
+
 
 if objListB == [] :
 	hillClimbS1(takenPos,objListW)
@@ -213,5 +217,7 @@ else :
 	hillClimbS2(takenPos,objListW,objListB)
 
 
+print
+print 
 print(countThreat1(objListW))
 displayPapan(takenPos, objListW, objListB)
