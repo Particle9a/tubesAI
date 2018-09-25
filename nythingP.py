@@ -257,6 +257,86 @@ def simulatedAnne1(takenPos,whiteList,temperature):
 		return(minState)
 
 #GENETIC ALGORITHM
+def Selection(population):
+	probList = []
+	pops = copy.copy(population)
+	maxThreat = 30
+	sumEn = sum((maxThreat - item['Cost']) for item in population)
+	for x in population :
+		prob = (maxThreat - x['Cost'])/sumEn
+		probList.append(prob)
+	t1 = numpy.random.choice(population,p = probList)
+	pops.remove(t1)
+	sumEn = sum((maxThreat - item['Cost']) for item in pops)
+	probList = []
+	for x in pops :
+		prob = (maxThreat - x['Cost'])/sumEn
+		probList.append(prob)
+	t2 = numpy.random.choice(pops,p =probList)
+	return(t1,t2)
+
+def Crossover(ind1,ind2) :
+	newInd = {}
+	newInd["White"] = []
+	newInd["Positions"] = []
+	for i in range(0,len(ind1['White'])):
+		rn = random.SystemRandom().randint(0,1)
+		if(rn == 0):
+			newInd["White"].append(ind1['White'][i])
+			newInd["Positions"].append(ind1['Positions'][i])
+		else :
+			newInd["White"].append(ind2['White'][i])
+			newInd["Positions"].append(ind2['Positions'][i])
+	newInd['Cost'] = countThreat1(newInd['White'])
+	return(newInd)
+
+def Mutation(ind) :
+	mutate = numpy.random.choice([True,False],p = [0.3,0.7])
+	if mutate :
+		indTemp = copy.deepcopy(ind)
+		rn = random.SystemRandom().randint(0,len(indTemp['White'])-1)
+		tupExist = True
+		while tupExist :
+			t1 = random.SystemRandom().randint(0,7)
+			t2 = random.SystemRandom().randint(0,7)
+			tupExist = (t1,t2) in ind['Positions']
+		indTemp['White'][rn].position = (t1,t2)
+		indTemp['Positions'][rn] = (t1,t2)
+		indTemp['Cost'] = countThreat1(indTemp['White'])
+		return(indTemp)
+	else :
+		return ind
+
+def GenAlgoLvl2(population):
+	if(len(population) > 977):
+		minVal  = population[0]
+		for x in population :
+			if (minVal['Cost'] > x['Cost']) :
+				minVal = x
+		return(minVal)
+	else :
+		return(GenAlgoLvl2(population + [Mutation(Crossover(*Selection(population)))]))
+
+def GeneticAlgo1(takenPos,whiteList):
+	obj = {}
+	obj['Positions'] = takenPos
+	obj['White'] = whiteList
+	obj['Cost'] = countThreat1(whiteList)
+	population = [obj]
+	for i in range(0,3):
+		tempWhite = copy.deepcopy(whiteList)
+		tempPos = copy.deepcopy(takenPos)
+		for j in range(0,len(whiteList)):
+			loc = (random.SystemRandom().randint(0,7),random.SystemRandom().randint(0,7))
+			tempWhite[j].position = loc
+			tempPos[j] = loc
+		obj['Positions'] = tempPos
+		obj['White'] = tempWhite
+		obj['Cost'] = countThreat1(tempWhite)
+		population.append(obj)
+	population.sort(key = lambda i : i['Cost'])
+	return(GenAlgoLvl2(population))
+
 
 
 #MAIN PROGRAM
@@ -264,6 +344,7 @@ if objListB == [] :
 	os.system('cls')
 	#hillClimbS1(takenPos,objListW)
 	res = simulatedAnne1(takenPos,objListW,0.95)
+	# res = GeneticAlgo1(takenPos,objListW)
 	print(res['Cost'])
 	displayPapan(res['Positions'],res['White'],[])
 
