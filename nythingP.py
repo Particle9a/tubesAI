@@ -1,6 +1,7 @@
 import random
 import copy
 import os
+import numpy
 
 def isVHAligned(pos1,pos2):
 	x1,y1 = pos1
@@ -188,7 +189,7 @@ def hillClimbS1(takenPos,whiteList) :
 			betterExist = True
 		print("Solution :")
 		displayPapan(minState['Positions'], minState['White'],[])
-		print(minState['Cost'])				
+		print(minState['Cost'])			
 
 def hillClimbS2(takenPos,whiteList,blackList) :
 	minState = {}
@@ -208,9 +209,53 @@ def hillClimbS2(takenPos,whiteList,blackList) :
 		displayPapan(minState['Positions'], minState['White'],minState['Black'])
 		print(minState['Cost'])
 
+def simulatedAnne1(takenPos,whiteList,temperature):
+	minState = {}
+	minState['White'] = whiteList
+	minState['Positions'] = takenPos
+	minState['Cost'] = 0	
+	if (temperature < 0.001):
+		return minState
+	else :
+		nextStt = False
+		countStep = 0
+		while not(nextStt):
+			countStep += 1
+			pieceNum = random.SystemRandom().randint(0,len(whiteList)-1)
+			a = random.SystemRandom().randint(0,7)
+			b = random.SystemRandom().randint(0,7)
+			tempPos = copy.deepcopy(takenPos)
+			tempWhite = copy.deepcopy(whiteList)
+			tempWhite[pieceNum].position = (a,b)
+			tempPos[pieceNum] = (a,b)
+			if (countThreat1(tempWhite) < countThreat1(whiteList)):
+				minState = simulatedAnne1(tempPos,tempWhite,temperature-0.005)
+				return(minState)
+			elif (countThreat1(tempWhite) == countThreat1(whiteList)):
+				change = numpy.random.choice([True,False], p =[temperature,1-temperature])
+				if change :
+					minState = simulatedAnne1(tempPos,tempWhite,temperature-0.005)
+					return(minState)
+				else :
+					continue
+			else :
+				probFactor = temperature*1/(countThreat1(tempWhite)-countThreat1(whiteList))
+				change = numpy.random.choice([True,False], p = [probFactor,1-probFactor])
+				if change :
+					minState = simulatedAnne1(tempPos,tempWhite,temperature-0.005)
+					return(minState)
+				else :
+					continue
+			if(countStep >= 100):
+				nextStt = True
+		return(minState)
 
 if objListB == [] :
-	hillClimbS1(takenPos,objListW)
+	os.system('cls')
+	res = simulatedAnne1(takenPos,objListW,0.95)
+	print(res['Cost'])
+	displayPapan(res['Positions'],res['White'],[])
+
 elif objListW == [] :
 	hillClimbS1(takenPos,objListB)
 else :
