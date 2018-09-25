@@ -83,6 +83,8 @@ for inp in fil :
 
 print(takenPos)
 
+
+#DISPLAY FUNCTION
 def displayPapan(takenPos, whiteList, blackList) :
 	for i in range(0,8):
 		string = ''
@@ -104,6 +106,7 @@ def displayPapan(takenPos, whiteList, blackList) :
 							break
 		print(string)
 
+#THREAT (ENERGY) Counter
 def countThreat1(whiteList):
 	count = 0
 	for x in whiteList :
@@ -122,6 +125,8 @@ def countThreat2(whiteList,blackList):
 			if y.isThreatenedBy(x) :
 				count += 1
 	return count
+
+# HILL CLIMBING ALGORITHM
 
 def hillClimb1(takenPos, whiteList):
 	minState = {}
@@ -209,6 +214,7 @@ def hillClimbS2(takenPos,whiteList,blackList) :
 		displayPapan(minState['Positions'], minState['White'],minState['Black'])
 		print(minState['Cost'])
 
+# SIMULATED ANNEALING ALGORITHM
 def simulatedAnne1(takenPos,whiteList,temperature):
 	minState = {}
 	minState['White'] = whiteList
@@ -250,6 +256,10 @@ def simulatedAnne1(takenPos,whiteList,temperature):
 				nextStt = True
 		return(minState)
 
+#GENETIC ALGORITHM
+
+
+#MAIN PROGRAM
 if objListB == [] :
 	os.system('cls')
 	#hillClimbS1(takenPos,objListW)
