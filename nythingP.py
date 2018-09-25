@@ -338,16 +338,25 @@ def GeneticAlgo1(takenPos,whiteList):
 	return(GenAlgoLvl2(population))
 
 
-
+method = input("Enter the method you want : ")
 #MAIN PROGRAM
-if objListB == [] :
-	os.system('cls')
-	#hillClimbS1(takenPos,objListW)
-	res = simulatedAnne1(takenPos,objListW,0.95)
-	# res = GeneticAlgo1(takenPos,objListW)
-	print(res['Cost'])
-	displayPapan(res['Positions'],res['White'],[])
-
+os.system('cls')
+if (method.lower() == "sa"):
+	if (objListB == []):
+		res = simulatedAnne1(takenPos,objListW,0.95)
+		print(res['Cost'])
+		displayPapan(res['Positions'],res['White'],[])
+	else :
+		hillClimbS2(takenPos,objListW,objListB)
+elif(method.lower() == "ga"):
+	if (objListB == []):
+		res = GeneticAlgo1(takenPos,objListW)
+		print(res['Cost'])
+		displayPapan(res['Positions'],res['White'],[])
+	else :
+		hillClimbS2(takenPos,objListW,objListB)
+elif objListB == [] :
+	hillClimbS1(takenPos,objListW)
 elif objListW == [] :
 	hillClimbS1(takenPos,objListB)
 else :
@@ -356,5 +365,3 @@ else :
 
 print
 print 
-print(countThreat1(objListW))
-displayPapan(takenPos, objListW, objListB)
