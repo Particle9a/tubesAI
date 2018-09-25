@@ -252,6 +252,7 @@ def simulatedAnne1(takenPos,whiteList,temperature):
 
 if objListB == [] :
 	os.system('cls')
+	hillClimbS1(takenPos,objListW)
 	res = simulatedAnne1(takenPos,objListW,0.95)
 	print(res['Cost'])
 	displayPapan(res['Positions'],res['White'],[])
