@@ -260,6 +260,53 @@ def simulatedAnne1(takenPos,whiteList,temperature):
 			if(countStep >= 100):
 				nextStt = True
 		return(minState)
+	
+def simulatedAnne2(takenPos,whiteList,blackList,temperature):
+	minState = {}
+	minState['White'] = whiteList
+	minState['Black'] = blackList
+	minState['Positions'] = takenPos
+	minState['Cost'] = countThreat1(whiteList) + countThreat1(blackList) - countThreat2(whiteList,blackList)
+	for i in range (0,100):
+		print(i)
+		print(minState['Cost'])
+		if (temperature == 0):
+			return minState
+		tempPos = []
+		tempWhite = copy.deepcopy(whiteList)
+		tempBlack = copy.deepcopy(blackList)
+		for x in range(0,len(whiteList)):
+			posX = random.randint(0,7)
+			posY = random.randint(0,7)
+			while ((posX,posY) in tempPos):
+				posX = random.randint(0,7)
+				posY = random.randint(0,7)
+			tempPos.append((posX,posY))
+			tempWhite[x].position = (posX,posY)
+		for x in range(0,len(blackList)):
+			posX = random.randint(0,7)
+			posY = random.randint(0,7)
+			while ((posX,posY) in tempPos):
+				posX = random.randint(0,7)
+				posY = random.randint(0,7)
+			tempPos.append((posX,posY))
+			tempBlack[x].position = (posX,posY)
+		tempV = countThreat1(tempWhite) + countThreat1(tempBlack) - countThreat2(tempWhite,tempBlack)
+		if (tempV < minState['Cost']):
+			minState['White'] = tempWhite
+			minState['Black'] = tempBlack
+			minState['Positions'] = tempPos
+			minState['Cost'] = tempV
+		else:
+			probFactor = numpy.exp((minState['Cost'] - tempV)/temperature)
+			change = numpy.random.choice([True,False], p = [probFactor,1-probFactor])
+			if (change):
+				minState['White'] = tempWhite
+				minState['Black'] = tempBlack
+				minState['Positions'] = tempPos
+				minState['Cost'] = tempV
+		temperature = temperature - 0.001	
+	return minState
 
 #GENETIC ALGORITHM
 def Selection(population):
@@ -462,7 +509,7 @@ if (method.lower() == "sa"):
 		print(res['Cost'])
 		displayPapan(res['Positions'],res['White'],[])
 	else :
-		hillClimbS2(takenPos,objListW,objListB)
+		res = simulatedAnne2(takenPos,objListW,objListB,0.95)
 		print(res['Cost'])
 		displayPapan(res['Positions'],res['White'],res['Black'])
 elif(method.lower() == "ga"):
