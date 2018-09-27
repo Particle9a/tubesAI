@@ -63,7 +63,7 @@ takenPos = []
 objListW = []
 objListB = []
 
-#Reading file, and asign the piece to list initialized before
+#Reading file, and assign the piece to list initialized before
 fil = open('input chess.txt')
 for inp in fil :
 	inp = inp.split()
@@ -338,19 +338,22 @@ def GeneticAlgo1(takenPos,whiteList):
 		obj['Positions'] = tempPos
 		obj['White'] = tempWhite
 		obj['Cost'] = countThreat1(tempWhite)
-		population.append(obj)
+		population.append(obj.copy())
 	population.sort(key = lambda i : i['Cost'])
 	return(GenAlgoLvl2(population))
 
+#Return two breed from population to mate
 def Selection2(population):
 	probList = []
 	pops = copy.copy(population)
-	maxThreat = 100
+	maxThreat = max(item['Cost'] for item in population)
+	print(maxThreat)
 	sumEn = sum((maxThreat - item['Cost']) for item in population)
 	for x in population :
 		prob = (maxThreat - x['Cost'])/sumEn
 		probList.append(prob)
 	t1 = numpy.random.choice(population,p = probList)
+	
 	pops.remove(t1)
 	sumEn = sum((maxThreat - item['Cost']) for item in pops)
 	probList = []
@@ -362,26 +365,47 @@ def Selection2(population):
 	return(t1,t2)
 
 def Crossover2(ind1,ind2) :
+	#Making intialization of new breed
 	newInd = {}
 	newInd["White"] = []
 	newInd["Black"] = []
 	newInd["Positions"] = []
+
 	for i in range(0,len(ind1['White'])):
 		rn = random.SystemRandom().randint(0,1)
 		if(rn == 0):
-			newInd["White"].append(ind1['White'][i])
-			newInd["Positions"].append(ind1['Positions'][i])
+			if (ind1['White'][i] not in newInd['Positions']):
+				newInd["White"].append(ind1['White'][i])
+				newInd["Positions"].append(ind1['Positions'][i])
+			else:
+				newInd["White"].append(ind2['White'][i])
+				newInd["Positions"].append(ind2['Positions'][i])
 		else :
-			newInd["White"].append(ind2['White'][i])
-			newInd["Positions"].append(ind2['Positions'][i])
+			if (ind2['White'][i] not in newInd['Positions']):
+				newInd["White"].append(ind2['White'][i])
+				newInd["Positions"].append(ind2['Positions'][i])
+			else:
+				newInd["White"].append(ind1['White'][i])
+				newInd["Positions"].append(ind1['Positions'][i])
+
+
 	for i in range(0,len(ind1['Black'])):
 		rn = random.SystemRandom().randint(0,1)
 		if(rn == 0):
-			newInd["Black"].append(ind1['Black'][i])
-			newInd["Positions"].append(ind1['Positions'][i])
+			if (ind1['Black'][i] not in newInd['Positions']):
+				newInd["Black"].append(ind1['Black'][i])
+				newInd["Positions"].append(ind1['Positions'][i])
+			else:
+				newInd["Black"].append(ind2['Black'][i])
+				newInd["Positions"].append(ind2['Positions'][i])
 		else :
-			newInd["Black"].append(ind2['Black'][i])
-			newInd["Positions"].append(ind2['Positions'][i])
+			if (ind2['Black'][i] not in newInd['Positions']):
+				newInd["Black"].append(ind2['Black'][i])
+				newInd["Positions"].append(ind2['Positions'][i])
+			else:
+				newInd["Black"].append(ind1['Black'][i])
+				newInd["Positions"].append(ind1['Positions'][i])
+
 	newInd['Cost'] = countThreat1(newInd['White']) + countThreat1(newInd['Black']) - countThreat2(newInd['White'],newInd['Black'])
 	print('cross-overing')
 	return(newInd)
@@ -393,6 +417,7 @@ def Mutation2(ind) :
 		indTemp = copy.deepcopy(ind)
 		rnWhite = random.SystemRandom().randint(0,len(indTemp['White'])-1)
 		rnBlack = random.SystemRandom().randint(0,len(indTemp['Black'])-1)
+
 		tupExist = True
 		while tupExist :
 			t1 = random.SystemRandom().randint(0,7)
@@ -416,42 +441,62 @@ def Mutation2(ind) :
 		return ind
 
 def GenAlgoLvl22(population):
-	if(len(population) > 50):
+
+	if(len(population) > 50): #Enough population has been made, return the minimum value
 		minVal  = population[0]
 		for x in population :
 			if (minVal['Cost'] > x['Cost']) :
 				minVal = x
 		return(minVal)
-	else :
-		print('computing	')
+	else : 
+		print('computing')
 		return(GenAlgoLvl22(population + [Mutation2(Crossover2(*Selection2(population)))]))
 
+
+
 def GeneticAlgo2(takenPos,whiteList,blackList):
+	#Making Population Object
 	obj = {}
 	obj['Positions'] = takenPos
 	obj['White'] = whiteList
 	obj['Black'] = blackList
 	obj['Cost'] = countThreat1(whiteList) + countThreat1(blackList) - countThreat2(whiteList,blackList)
 	population = [obj]
+
+	#Making new population
 	for i in range(0,3):
 		tempWhite = copy.deepcopy(whiteList)
 		tempBlack = copy.deepcopy(blackList)
 		tempPos = copy.deepcopy(takenPos)
+
+		#Making new White List
 		for j in range(0,len(whiteList)):
 			loc = (random.SystemRandom().randint(0,7),random.SystemRandom().randint(0,7))
+			while loc in tempPos:
+				loc = (random.SystemRandom().randint(0,7),random.SystemRandom().randint(0,7))
 			tempWhite[j].position = loc
 			tempPos[j] = loc
+
+		#Making new Black List
 		for j in range(0,len(blackList)):
 			loc = (random.SystemRandom().randint(0,7),random.SystemRandom().randint(0,7))
+			while loc in tempPos:
+				loc = (random.SystemRandom().randint(0,7),random.SystemRandom().randint(0,7))
 			tempBlack[j].position = loc
 			tempPos[j] = loc
+
+		#Completing new population and adding it to population list
 		obj['Positions'] = tempPos
 		obj['White'] = tempWhite
 		obj['Black'] = tempBlack
 		obj['Cost'] = countThreat1(tempWhite) + countThreat1(tempBlack) + countThreat2(tempWhite,tempBlack)
-		population.append(obj)
+		population.append(obj.copy())
+
 	population.sort(key = lambda i : i['Cost'])
+	print(population)
 	return(GenAlgoLvl22(population))
+
+
 
 method = input("Enter the method you want : ")
 #MAIN PROGRAM
