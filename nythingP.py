@@ -3,6 +3,7 @@ import copy
 import os
 import numpy
 
+#Return true if two chess piece are aligne horizontally or vertically
 def isVHAligned(pos1,pos2):
 	x1,y1 = pos1
 	x2,y2 = pos2
@@ -12,6 +13,7 @@ def isVHAligned(pos1,pos2):
 		return(True)
 	return(False)
 
+#Return true if two chess piece are aligned diagonally
 def isDAligned(pos1,pos2):
 	x1,y1 = pos1
 	x2,y2 = pos2
@@ -21,6 +23,7 @@ def isDAligned(pos1,pos2):
 		return True
 	return False
 
+#Return true if horse threats other piece
 def isHorseAligned(pos1,pos2):
 	x1,y1 = pos1
 	x2,y2 = pos2
@@ -28,10 +31,11 @@ def isHorseAligned(pos1,pos2):
 	c2 = abs(y1-y2)
 	if ((c1 == 1) and (c2 == 3)):
 		return(True)
-	elif ((c1 == 3) and (c2 == 3)):
+	elif ((c1 == 3) and (c2 == 1)):
 		return(True)
 	return(False)
 
+#Class for chess piece
 class Pion :
 	def __init__(self, t, x,y) :
 		self.type = t
@@ -54,11 +58,12 @@ class Pion :
 				return(True)
 		return(False)
 
+#Initialization for, position taken by piece, list of white piece and list of black piece
 takenPos = []
 objListW = []
 objListB = []
 
-#Membuat List Objek
+#Reading file, and asign the piece to list initialized before
 fil = open('input chess.txt')
 for inp in fil :
 	inp = inp.split()
@@ -84,12 +89,12 @@ for inp in fil :
 print(takenPos)
 
 
-#DISPLAY FUNCTION
+#DISPLAY FUNCTION 
 def displayPapan(takenPos, whiteList, blackList) :
 	for i in range(0,8):
 		string = ''
 		for j in range(0,8):
-			if ((i,j) not in takenPos):
+			if ((i,j) not in takenPos): #Kayaknya ketuker
 				string += '-'
 			else :
 				found = False
@@ -148,7 +153,7 @@ def hillClimb1(takenPos, whiteList):
 	
 def hillClimb2(takenPos, whiteList,blackList):
 	minState = {}
-	minState['Cost'] = countThreat1(whiteList)
+	minState['Cost'] = countThreat1(whiteList) + countThreat1(blackList) - countThreat2(whiteList,blackList)
 	minState['White'] = whiteList
 	minState['Black'] = blackList
 	for x in range(0,len(whiteList)) :
@@ -337,6 +342,116 @@ def GeneticAlgo1(takenPos,whiteList):
 	population.sort(key = lambda i : i['Cost'])
 	return(GenAlgoLvl2(population))
 
+def Selection2(population):
+	probList = []
+	pops = copy.copy(population)
+	maxThreat = 100
+	sumEn = sum((maxThreat - item['Cost']) for item in population)
+	for x in population :
+		prob = (maxThreat - x['Cost'])/sumEn
+		probList.append(prob)
+	t1 = numpy.random.choice(population,p = probList)
+	pops.remove(t1)
+	sumEn = sum((maxThreat - item['Cost']) for item in pops)
+	probList = []
+	for x in pops :
+		prob = (maxThreat - x['Cost'])/sumEn
+		probList.append(prob)
+	t2 = numpy.random.choice(pops,p =probList)
+	print('selecting')
+	return(t1,t2)
+
+def Crossover2(ind1,ind2) :
+	newInd = {}
+	newInd["White"] = []
+	newInd["Black"] = []
+	newInd["Positions"] = []
+	for i in range(0,len(ind1['White'])):
+		rn = random.SystemRandom().randint(0,1)
+		if(rn == 0):
+			newInd["White"].append(ind1['White'][i])
+			newInd["Positions"].append(ind1['Positions'][i])
+		else :
+			newInd["White"].append(ind2['White'][i])
+			newInd["Positions"].append(ind2['Positions'][i])
+	for i in range(0,len(ind1['Black'])):
+		rn = random.SystemRandom().randint(0,1)
+		if(rn == 0):
+			newInd["Black"].append(ind1['Black'][i])
+			newInd["Positions"].append(ind1['Positions'][i])
+		else :
+			newInd["Black"].append(ind2['Black'][i])
+			newInd["Positions"].append(ind2['Positions'][i])
+	newInd['Cost'] = countThreat1(newInd['White']) + countThreat1(newInd['Black']) - countThreat2(newInd['White'],newInd['Black'])
+	print('cross-overing')
+	return(newInd)
+
+def Mutation2(ind) :
+	mutate = numpy.random.choice([True,False],p = [0.3,0.7])
+	print('mutating')
+	if mutate :
+		indTemp = copy.deepcopy(ind)
+		rnWhite = random.SystemRandom().randint(0,len(indTemp['White'])-1)
+		rnBlack = random.SystemRandom().randint(0,len(indTemp['Black'])-1)
+		tupExist = True
+		while tupExist :
+			t1 = random.SystemRandom().randint(0,7)
+			t2 = random.SystemRandom().randint(0,7)
+			tupExist = (t1,t2) in ind['Positions']
+		indTemp['White'][rnWhite].position = (t1,t2)
+		indTemp['Positions'][rnWhite] = (t1,t2)
+
+		tupExist = True
+		while tupExist :
+			t1 = random.SystemRandom().randint(0,7)
+			t2 = random.SystemRandom().randint(0,7)
+			tupExist = (t1,t2) in ind['Positions']
+		indTemp['Black'][rnBlack].position = (t1,t2)
+		indTemp['Positions'][rnBlack] = (t1,t2)
+		indTemp['Cost'] = countThreat1(indTemp['White']) + countThreat1(indTemp['Black']) - countThreat2(indTemp['White'], indTemp['Black'])
+		print('mutating 1')
+		return(indTemp)
+	else :
+		print('mutating2')
+		return ind
+
+def GenAlgoLvl22(population):
+	if(len(population) > 50):
+		minVal  = population[0]
+		for x in population :
+			if (minVal['Cost'] > x['Cost']) :
+				minVal = x
+		return(minVal)
+	else :
+		print('computing	')
+		return(GenAlgoLvl22(population + [Mutation2(Crossover2(*Selection2(population)))]))
+
+def GeneticAlgo2(takenPos,whiteList,blackList):
+	obj = {}
+	obj['Positions'] = takenPos
+	obj['White'] = whiteList
+	obj['Black'] = blackList
+	obj['Cost'] = countThreat1(whiteList) + countThreat1(blackList) - countThreat2(whiteList,blackList)
+	population = [obj]
+	for i in range(0,3):
+		tempWhite = copy.deepcopy(whiteList)
+		tempBlack = copy.deepcopy(blackList)
+		tempPos = copy.deepcopy(takenPos)
+		for j in range(0,len(whiteList)):
+			loc = (random.SystemRandom().randint(0,7),random.SystemRandom().randint(0,7))
+			tempWhite[j].position = loc
+			tempPos[j] = loc
+		for j in range(0,len(blackList)):
+			loc = (random.SystemRandom().randint(0,7),random.SystemRandom().randint(0,7))
+			tempBlack[j].position = loc
+			tempPos[j] = loc
+		obj['Positions'] = tempPos
+		obj['White'] = tempWhite
+		obj['Black'] = tempBlack
+		obj['Cost'] = countThreat1(tempWhite) + countThreat1(tempBlack) + countThreat2(tempWhite,tempBlack)
+		population.append(obj)
+	population.sort(key = lambda i : i['Cost'])
+	return(GenAlgoLvl22(population))
 
 method = input("Enter the method you want : ")
 #MAIN PROGRAM
@@ -348,13 +463,17 @@ if (method.lower() == "sa"):
 		displayPapan(res['Positions'],res['White'],[])
 	else :
 		hillClimbS2(takenPos,objListW,objListB)
+		print(res['Cost'])
+		displayPapan(res['Positions'],res['White'],res['Black'])
 elif(method.lower() == "ga"):
 	if (objListB == []):
 		res = GeneticAlgo1(takenPos,objListW)
 		print(res['Cost'])
 		displayPapan(res['Positions'],res['White'],[])
 	else :
-		hillClimbS2(takenPos,objListW,objListB)
+		res = GeneticAlgo2(takenPos,objListW,objListB)
+		print(res['Cost'])
+		displayPapan(res['Positions'],res['White'],res['Black'])
 elif objListB == [] :
 	hillClimbS1(takenPos,objListW)
 elif objListW == [] :
@@ -363,5 +482,5 @@ else :
 	hillClimbS2(takenPos,objListW,objListB)
 
 
-print
-print 
+print ("NYAHAHAHAH") 
+print ("DEBORAH")
