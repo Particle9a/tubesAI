@@ -394,8 +394,9 @@ def Selection2(population):
 	probList = []
 	pops = copy.copy(population)
 	maxThreat = max(item['Cost'] for item in population)
-	print(maxThreat)
+	#print(maxThreat)
 	sumEn = sum((maxThreat - item['Cost']) for item in population)
+
 	for x in population :
 		prob = (maxThreat - x['Cost'])/sumEn
 		probList.append(prob)
@@ -408,7 +409,11 @@ def Selection2(population):
 		prob = (maxThreat - x['Cost'])/sumEn
 		probList.append(prob)
 	t2 = numpy.random.choice(pops,p =probList)
-	print('selecting')
+	#print('selecting')
+	
+	#print('Selection')
+	#print(t1['Positions'])
+	#print(t2['Positions'])
 	return(t1,t2)
 
 def Crossover2(ind1,ind2) :
@@ -441,25 +446,32 @@ def Crossover2(ind1,ind2) :
 		if(rn == 0):
 			if (ind1['Black'][i] not in newInd['Positions']):
 				newInd["Black"].append(ind1['Black'][i])
-				newInd["Positions"].append(ind1['Positions'][i])
+				newInd["Positions"].append(ind1['Positions'][i+len(newInd['White'])])
 			else:
 				newInd["Black"].append(ind2['Black'][i])
-				newInd["Positions"].append(ind2['Positions'][i])
+				newInd["Positions"].append(ind2['Positions'][i+len(newInd['White'])])
 		else :
 			if (ind2['Black'][i] not in newInd['Positions']):
 				newInd["Black"].append(ind2['Black'][i])
-				newInd["Positions"].append(ind2['Positions'][i])
+				newInd["Positions"].append(ind2['Positions'][i+len(newInd['White'])])
 			else:
 				newInd["Black"].append(ind1['Black'][i])
-				newInd["Positions"].append(ind1['Positions'][i])
+				newInd["Positions"].append(ind1['Positions'][i+len(newInd['White'])])
 
 	newInd['Cost'] = countThreat1(newInd['White']) + countThreat1(newInd['Black']) - countThreat2(newInd['White'],newInd['Black'])
-	print('cross-overing')
+	#print('cross-overing')
+	#print ('Indice 1')
+	#print (ind1['Positions'])
+	#print ('Indice 2')
+	#print (ind2['Positions'])
+	#print ('New Indice')
+	#print (len(newInd['Positions']))
+	#print (newInd['Positions'])
 	return(newInd)
 
 def Mutation2(ind) :
 	mutate = numpy.random.choice([True,False],p = [0.3,0.7])
-	print('mutating')
+	#print('mutating')
 	if mutate :
 		indTemp = copy.deepcopy(ind)
 		rnWhite = random.SystemRandom().randint(0,len(indTemp['White'])-1)
@@ -469,7 +481,7 @@ def Mutation2(ind) :
 		while tupExist :
 			t1 = random.SystemRandom().randint(0,7)
 			t2 = random.SystemRandom().randint(0,7)
-			tupExist = (t1,t2) in ind['Positions']
+			tupExist = (t1,t2) in ind['Positions'] or (t1,t2) in indTemp['Positions']
 		indTemp['White'][rnWhite].position = (t1,t2)
 		indTemp['Positions'][rnWhite] = (t1,t2)
 
@@ -477,26 +489,38 @@ def Mutation2(ind) :
 		while tupExist :
 			t1 = random.SystemRandom().randint(0,7)
 			t2 = random.SystemRandom().randint(0,7)
-			tupExist = (t1,t2) in ind['Positions']
+			tupExist = (t1,t2) in ind['Positions'] or (t1,t2) in indTemp['Positions']
 		indTemp['Black'][rnBlack].position = (t1,t2)
-		indTemp['Positions'][rnBlack] = (t1,t2)
+		indTemp['Positions'][rnBlack+len(indTemp['White'])] = (t1,t2)
+
 		indTemp['Cost'] = countThreat1(indTemp['White']) + countThreat1(indTemp['Black']) - countThreat2(indTemp['White'], indTemp['Black'])
-		print('mutating 1')
+		#print('mutating 1')
+		#print (len(indTemp['Positions']))
 		return(indTemp)
 	else :
-		print('mutating2')
+		#print('mutating2')
+		#print (len(ind['Positions']))
 		return ind
 
 def GenAlgoLvl22(population):
 
-	if(len(population) > 50): #Enough population has been made, return the minimum value
+	if(len(population) > 900): #Enough population has been made, return the minimum value
 		minVal  = population[0]
 		for x in population :
-			if (minVal['Cost'] > x['Cost']) :
+			if (minVal['Cost'] > x['Cost']) and len(set(x['Positions'])) == len(x['Positions']):
 				minVal = x
-		return(minVal)
+				'''
+		print(minVal['Positions'])
+		print('White')
+		for w in minVal['White']:
+			print(w.position)
+		print('Black')
+		for b in minVal['Black']:
+			print(b.position)
+			'''
+		return(minVal)	
 	else : 
-		print('computing')
+		#print('computing')
 		return(GenAlgoLvl22(population + [Mutation2(Crossover2(*Selection2(population)))]))
 
 
@@ -511,7 +535,7 @@ def GeneticAlgo2(takenPos,whiteList,blackList):
 	population = [obj]
 
 	#Making new population
-	for i in range(0,3):
+	for i in range(0,10):
 		tempWhite = copy.deepcopy(whiteList)
 		tempBlack = copy.deepcopy(blackList)
 		tempPos = copy.deepcopy(takenPos)
@@ -530,8 +554,16 @@ def GeneticAlgo2(takenPos,whiteList,blackList):
 			while loc in tempPos:
 				loc = (random.SystemRandom().randint(0,7),random.SystemRandom().randint(0,7))
 			tempBlack[j].position = loc
-			tempPos[j] = loc
-
+			tempPos[j+len(whiteList)] = loc
+		'''
+		print(tempPos)
+		for w in tempWhite:
+			print(w.type)
+			print(w.position)
+		for b in tempBlack:
+			print(b.type)
+			print(b.position)
+		''' 	
 		#Completing new population and adding it to population list
 		obj['Positions'] = tempPos
 		obj['White'] = tempWhite
@@ -540,7 +572,7 @@ def GeneticAlgo2(takenPos,whiteList,blackList):
 		population.append(obj.copy())
 
 	population.sort(key = lambda i : i['Cost'])
-	print(population)
+#print(population)
 	return(GenAlgoLvl22(population))
 
 
