@@ -3,7 +3,7 @@ import copy
 import os
 import numpy
 
-#Return true if two chess piece are aligne horizontally or vertically
+# Return true if two chess piece are aligne horizontally or vertically
 def isVHAligned(pos1,pos2):
 	x1,y1 = pos1
 	x2,y2 = pos2
@@ -13,7 +13,7 @@ def isVHAligned(pos1,pos2):
 		return(True)
 	return(False)
 
-#Return true if two chess piece are aligned diagonally
+# Return true if two chess piece are aligned diagonally
 def isDAligned(pos1,pos2):
 	x1,y1 = pos1
 	x2,y2 = pos2
@@ -23,7 +23,7 @@ def isDAligned(pos1,pos2):
 		return True
 	return False
 
-#Return true if horse threats other piece
+# Return true if horse threats other piece
 def isHorseAligned(pos1,pos2):
 	x1,y1 = pos1
 	x2,y2 = pos2
@@ -35,7 +35,7 @@ def isHorseAligned(pos1,pos2):
 		return(True)
 	return(False)
 
-#Class for chess piece
+# Class for chess piece
 class Pion :
 	def __init__(self, t, x,y) :
 		self.type = t
@@ -58,12 +58,12 @@ class Pion :
 				return(True)
 		return(False)
 
-#Initialization for, position taken by piece, list of white piece and list of black piece
+# Initialization for, position taken by piece, list of white piece and list of black piece
 takenPos = []
 objListW = []
 objListB = []
 
-#Reading file, and assign the piece to list initialized before
+# Reading file, and assign the piece to list initialized before
 fil = open('input chess.txt')
 for inp in fil :
 	inp = inp.split()
@@ -88,8 +88,7 @@ for inp in fil :
 
 print(takenPos)
 
-
-#DISPLAY FUNCTION 
+# DISPLAY FUNCTION 
 def displayPapan(takenPos, whiteList, blackList) :
 	for i in range(0,8):
 		string = ''
@@ -108,10 +107,12 @@ def displayPapan(takenPos, whiteList, blackList) :
 						if ((i,j) == c.position):
 							found = True
 							string += c.type.lower()[0]
-							break
+							break			
 		print(string)
+	print()
+	print(takenPos)
 
-#THREAT (ENERGY) Counter
+# THREAT (ENERGY) Counter
 def countThreat1(whiteList):
 	count = 0
 	for x in whiteList :
@@ -131,8 +132,23 @@ def countThreat2(whiteList,blackList):
 				count += 1
 	return count
 
-# HILL CLIMBING ALGORITHM
+# THREAT POSISITION
+def printThreat1(whiteList):
+	for x in whiteList :
+		for y in whiteList :
+			if (x != y) :
+				if x.isThreatenedBy(y) :
+					print(y.position,"attack", x.position)
 
+def printThreat2(whiteList,blackList):
+	for x in whiteList:
+		for y in blackList:
+			if x.isThreatenedBy(y):
+				print(y.position, "attack", x.position)
+			if y.isThreatenedBy(x):
+				print(x.position, "attack", y.position)
+
+# HILL CLIMBING ALGORITHM
 def hillClimb1(takenPos, whiteList):
 	minState = {}
 	minState['Cost'] = countThreat1(whiteList)
@@ -197,9 +213,12 @@ def hillClimbS1(takenPos,whiteList) :
 		if (tempState['Cost'] < minState['Cost']):
 			minState = tempState
 			betterExist = True
-		print("Solution :")
-		displayPapan(minState['Positions'], minState['White'],[])
-		print(minState['Cost'])			
+	print("Solution :")
+	displayPapan(minState['Positions'], minState['White'],[])
+	print()
+	print("Threats (same color) =", minState['Cost'])	
+	print()
+	printThreat1(minState['White'])	
 
 def hillClimbS2(takenPos,whiteList,blackList) :
 	minState = {}
@@ -211,13 +230,20 @@ def hillClimbS2(takenPos,whiteList,blackList) :
 	while betterExist :
 		betterExist = False
 		os.system('cls')
-		tempState = hillClimb2(minState['Positions'],minState['White'], minState['Black'])
+		tempState = hillClimb2(minState['Positions'], minState['White'], minState['Black'])
 		if (tempState['Cost'] < minState['Cost']):
 			minState = tempState
 			betterExist = True
 		print("Solution :")
 		displayPapan(minState['Positions'], minState['White'],minState['Black'])
-		print(minState['Cost'])
+		print(abs(minState['Cost']))
+	# print("Threats (same color) =")
+	# printThreat1(minState['White'])
+	# print("=======================")
+	# printThreat1(minState['Black'])
+	# print()
+	# print("Threat across color =")
+	# printThreat2(minState['White'],minState['Black'])
 
 # SIMULATED ANNEALING ALGORITHM
 def simulatedAnne1(takenPos,whiteList,temperature):
@@ -268,8 +294,8 @@ def simulatedAnne2(takenPos,whiteList,blackList,temperature):
 	minState['Positions'] = takenPos
 	minState['Cost'] = countThreat1(whiteList) + countThreat1(blackList) - countThreat2(whiteList,blackList)
 	for i in range (0,100):
-		print(i)
-		print(minState['Cost'])
+		# print(i)
+		# print(minState['Cost'])
 		if (temperature == 0):
 			return minState
 		tempPos = []
@@ -523,8 +549,6 @@ def GenAlgoLvl22(population):
 		#print('computing')
 		return(GenAlgoLvl22(population + [Mutation2(Crossover2(*Selection2(population)))]))
 
-
-
 def GeneticAlgo2(takenPos,whiteList,blackList):
 	#Making Population Object
 	obj = {}
@@ -575,36 +599,32 @@ def GeneticAlgo2(takenPos,whiteList,blackList):
 #print(population)
 	return(GenAlgoLvl22(population))
 
-
-
 method = input("Enter the method you want : ")
 #MAIN PROGRAM
-os.system('cls')
 if (method.lower() == "sa"):
 	if (objListB == []):
 		res = simulatedAnne1(takenPos,objListW,0.95)
-		print(res['Cost'])
 		displayPapan(res['Positions'],res['White'],[])
+		print(res['Cost'])
 	else :
 		res = simulatedAnne2(takenPos,objListW,objListB,0.95)
-		print(res['Cost'])
 		displayPapan(res['Positions'],res['White'],res['Black'])
+		print(res['Cost'])
 elif(method.lower() == "ga"):
 	if (objListB == []):
 		res = GeneticAlgo1(takenPos,objListW)
-		print(res['Cost'])
 		displayPapan(res['Positions'],res['White'],[])
+		print(res['Cost'])
 	else :
 		res = GeneticAlgo2(takenPos,objListW,objListB)
-		print(res['Cost'])
 		displayPapan(res['Positions'],res['White'],res['Black'])
-elif objListB == [] :
-	hillClimbS1(takenPos,objListW)
-elif objListW == [] :
-	hillClimbS1(takenPos,objListB)
-else :
+		print(res['Cost'])
+elif(method.lower() == "hc"):
+	if (objListB == []) :
+		hillClimbS1(takenPos,objListW)
+	elif (objListW == []) :
+		hillClimbS1(takenPos,objListB)
+	else :
+		hillClimbS2(takenPos,objListW,objListB)	
+else : # by default use hill climbing (bonus)
 	hillClimbS2(takenPos,objListW,objListB)
-
-
-print ("NYAHAHAHAH") 
-print ("DEBORAH")
