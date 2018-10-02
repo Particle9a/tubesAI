@@ -3,13 +3,18 @@ import copy
 import os
 import numpy
 
-# Return true if two chess piece are aligne horizontally or vertically
-def isVHAligned(pos1,pos2):
+# Return true if two chess piece are aligned horizontally or vertically
+def isHAligned(pos1,pos2):
 	x1,y1 = pos1
 	x2,y2 = pos2
 	if (x1 == x2):
 		return(True)
-	elif (y1 == y2):
+	return(False)
+
+def isVAligned(pos1,pos2):
+	x1,y1 = pos1
+	x2,y2 = pos2
+	if (y1 == y2):
 		return(True)
 	return(False)
 
@@ -21,7 +26,85 @@ def isDAligned(pos1,pos2):
 	d2 = abs(x2 - y2)
 	if (d1 == d2):
 		return True
+	elif ((x1 + y1) == (x2 + y2)):
+		return True
 	return False
+
+def isBlockedV(pos1,pos2,listpos):
+	x1,y1 = pos1
+	x2,y2 = pos2
+	xTemp = x1
+	if x2 > x1 :
+		xTemp += 1
+	else :
+		xTemp -= 1
+	while(xTemp != x2):
+		if ((xTemp,y1) in listpos):
+			return True
+		if x2 > x1 :
+			xTemp += 1
+		else :
+			xTemp -= 1
+		if xTemp < 0 :
+			return False
+		elif xTemp > 7 :
+			return False 
+	return False
+
+
+def isBlockedH(pos1,pos2,listpos):
+	x1,y1 = pos1
+	x2,y2 = pos2
+	yTemp = y1
+	if y2 > y1 :
+		yTemp += 1
+	else :
+		yTemp -= 1
+	while(yTemp != y2):
+		if ((x1,yTemp) in listpos):
+			return True
+		if y2 > y1 :
+			yTemp += 1
+		else :
+			yTemp -= 1
+		if yTemp < 0 :
+			return False
+		elif yTemp > 7 :
+			return False 
+	return False
+
+def isBlockedD(pos1,pos2,listpos):
+	x1,y1 = pos1
+	x2,y2 = pos2
+	xTemp = x1
+	yTemp = y1
+	
+	if x2 > x1 :
+		xTemp += 1
+	else :
+		xTemp -= 1
+	if y2 > y1 :
+		yTemp += 1
+	else :
+		yTemp -= 1
+	while(xTemp != x2):
+		if ((xTemp,yTemp) in listpos):
+			return True
+		if x2 > x1 :
+			xTemp += 1
+		else :
+			xTemp -= 1
+		if y2 > y1 :
+			yTemp += 1
+		else :
+			yTemp -= 1
+		if yTemp < 0 :
+			return False
+		elif yTemp > 7 :
+			return False 
+	return False
+
+
 
 # Return true if horse threats other piece
 def isHorseAligned(pos1,pos2):
@@ -41,18 +124,28 @@ class Pion :
 		self.type = t
 		self.position = (x,y)
 
-	def isThreatenedBy(self,obj) :
+	def isThreatenedBy(self,obj,listPos) :
 		if (obj.type == 'QUEEN'):
-			if (isVHAligned(self.position, obj.position)):
-				return(True)
+			if (isVAligned(self.position, obj.position)):
+				if(not isBlockedV(self.position,obj.position,listPos)):
+					return(True)
+			elif (isHAligned(self.position, obj.position)):
+				if(not isBlockedH(self.position,obj.position,listPos)):
+					return(True)
 			elif (isDAligned(self.position, obj.position)):
-				return(True)
+				if(not isBlockedD(self.position,obj.position, listPos)):
+					return(True)
 		elif (obj.type == 'ROOK'):
-			if (isVHAligned(self.position, obj.position)):
-				return(True)
+			if (isVAligned(self.position, obj.position)):
+				if(not isBlockedV(self.position,obj.position,listPos)):
+					return(True)
+			elif (isHAligned(self.position, obj.position)):
+				if(not isBlockedH(self.position,obj.position,listPos)):
+					return(True)
 		elif (obj.type == 'BISHOP'):
 			if (isDAligned(self.position, obj.position)):
-				return(True)
+				if(not isBlockedD(self.position,obj.position, listPos)):
+					return(True)
 		elif (obj.type == 'KNIGHT'):
 			if (isHorseAligned(self.position,obj.position)):
 				return(True)
@@ -113,45 +206,45 @@ def displayPapan(takenPos, whiteList, blackList) :
 	print(takenPos)
 
 # THREAT (ENERGY) Counter
-def countThreat1(whiteList):
+def countThreat1(whiteList,listPos):
 	count = 0
 	for x in whiteList :
 		for y in whiteList :
 			if (x != y) :
-				if x.isThreatenedBy(y) :
+				if x.isThreatenedBy(y,listPos) :
 					count += 1
 	return count
 
-def countThreat2(whiteList,blackList):
+def countThreat2(whiteList,blackList,listPos):
 	count = 0
 	for x in whiteList :
 		for y in blackList :
-			if x.isThreatenedBy(y) :
+			if x.isThreatenedBy(y,listPos) :
 				count += 1
-			if y.isThreatenedBy(x) :
+			if y.isThreatenedBy(x,listPos) :
 				count += 1
 	return count
 
 # THREAT POSISITION
-def printThreat1(whiteList):
+def printThreat1(whiteList,listPos):
 	for x in whiteList :
 		for y in whiteList :
 			if (x != y) :
-				if x.isThreatenedBy(y) :
+				if x.isThreatenedBy(y,listPos) :
 					print(y.position,"attack", x.position)
 
-def printThreat2(whiteList,blackList):
+def printThreat2(whiteList,blackList,listPos):
 	for x in whiteList:
 		for y in blackList:
-			if x.isThreatenedBy(y):
+			if x.isThreatenedBy(y,listPos):
 				print(y.position, "attack", x.position)
-			if y.isThreatenedBy(x):
+			if y.isThreatenedBy(x,listPos):
 				print(x.position, "attack", y.position)
 
 # HILL CLIMBING ALGORITHM
 def hillClimb1(takenPos, whiteList):
 	minState = {}
-	minState['Cost'] = countThreat1(whiteList)
+	minState['Cost'] = countThreat1(whiteList,takenPos)
 	for x in range(0,len(whiteList)) :
 		for a in range(0,8):
 			for b in range(0,8):
@@ -160,7 +253,7 @@ def hillClimb1(takenPos, whiteList):
 					tempWhite = copy.deepcopy(whiteList)
 					tempWhite[x].position = (a,b)
 					tempPos[x] = (a,b)
-					tempV = countThreat1(tempWhite)
+					tempV = countThreat1(tempWhite,takenPos)
 					if (tempV < minState['Cost']):
 						minState['Cost'] = tempV
 						minState['Positions'] = tempPos
@@ -169,7 +262,7 @@ def hillClimb1(takenPos, whiteList):
 	
 def hillClimb2(takenPos, whiteList,blackList):
 	minState = {}
-	minState['Cost'] = countThreat1(whiteList) + countThreat1(blackList) - countThreat2(whiteList,blackList)
+	minState['Cost'] = countThreat1(whiteList,takenPos) + countThreat1(blackList,takenPos) - countThreat2(whiteList,blackList,takenPos)
 	minState['White'] = whiteList
 	minState['Black'] = blackList
 	for x in range(0,len(whiteList)) :
@@ -180,7 +273,7 @@ def hillClimb2(takenPos, whiteList,blackList):
 					tempWhite = copy.deepcopy(whiteList)
 					tempWhite[x].position = (a,b)
 					tempPos[x] = (a,b)
-					tempV = countThreat1(tempWhite) + countThreat1(blackList) - countThreat2(tempWhite,blackList)
+					tempV = countThreat1(tempWhite,takenPos) + countThreat1(blackList,takenPos) - countThreat2(tempWhite,blackList,takenPos)
 					if (tempV < minState['Cost']):
 						minState['Cost'] = tempV
 						minState['Positions'] = tempPos
@@ -193,7 +286,7 @@ def hillClimb2(takenPos, whiteList,blackList):
 					tempBlack = copy.deepcopy(blackList)
 					tempBlack[x].position = (a,b)
 					tempPos[x + len(whiteList)] = (a,b)
-					tempV = countThreat1(tempWhite) + countThreat1(tempBlack) - countThreat2(whiteList, tempBlack)
+					tempV = countThreat1(tempWhite,takenPos) + countThreat1(tempBlack,takenPos) - countThreat2(whiteList, tempBlack,takenPos)
 					if (tempV < minState['Cost']):
 						minState['Cost'] = tempV
 						minState['Positions'] = tempPos
@@ -204,7 +297,7 @@ def hillClimbS1(takenPos,whiteList) :
 	minState = {}
 	minState['Positions'] = copy.deepcopy(takenPos)
 	minState['White'] = copy.deepcopy(whiteList)
-	minState['Cost'] = countThreat1(whiteList)
+	minState['Cost'] = countThreat1(whiteList,takenPos)
 	betterExist = True
 	while betterExist :
 		betterExist = False
@@ -218,14 +311,14 @@ def hillClimbS1(takenPos,whiteList) :
 	print()
 	print("Threats (same color) =", minState['Cost'])	
 	print()
-	printThreat1(minState['White'])	
+	printThreat1(minState['White'],takenPos)	
 
 def hillClimbS2(takenPos,whiteList,blackList) :
 	minState = {}
 	minState['Positions'] = copy.deepcopy(takenPos)
 	minState['White'] = copy.deepcopy(whiteList)
 	minState['Black'] = copy.deepcopy(blackList)
-	minState['Cost'] = countThreat1(whiteList) + countThreat1(blackList) - countThreat2(whiteList,blackList)
+	minState['Cost'] = countThreat1(whiteList,takenPos) + countThreat1(blackList,takenPos) - countThreat2(whiteList,blackList,takenPos)
 	betterExist = True
 	while betterExist :
 		betterExist = False
@@ -250,7 +343,7 @@ def simulatedAnne1(takenPos,whiteList,temperature):
 	minState = {}
 	minState['White'] = whiteList
 	minState['Positions'] = takenPos
-	minState['Cost'] = 0	
+	minState['Cost'] = countThreat1(whiteList,takenPos )	
 	if (temperature < 0.001):
 		return minState
 	else :
@@ -265,10 +358,10 @@ def simulatedAnne1(takenPos,whiteList,temperature):
 			tempWhite = copy.deepcopy(whiteList)
 			tempWhite[pieceNum].position = (a,b)
 			tempPos[pieceNum] = (a,b)
-			if (countThreat1(tempWhite) < countThreat1(whiteList)):
+			if (countThreat1(tempWhite,takenPos) < countThreat1(whiteList,takenPos)):
 				minState = simulatedAnne1(tempPos,tempWhite,temperature-0.005)
 				return(minState)
-			elif (countThreat1(tempWhite) == countThreat1(whiteList)):
+			elif (countThreat1(tempWhite,takenPos) == countThreat1(whiteList,takenPos)):
 				change = numpy.random.choice([True,False], p =[temperature,1-temperature])
 				if change :
 					minState = simulatedAnne1(tempPos,tempWhite,temperature-0.005)
@@ -276,7 +369,7 @@ def simulatedAnne1(takenPos,whiteList,temperature):
 				else :
 					continue
 			else :
-				probFactor = temperature*1/(countThreat1(tempWhite)-countThreat1(whiteList))
+				probFactor = temperature*1/(countThreat1(tempWhite,takenPos)-countThreat1(whiteList,takenPos))
 				change = numpy.random.choice([True,False], p = [probFactor,1-probFactor])
 				if change :
 					minState = simulatedAnne1(tempPos,tempWhite,temperature-0.005)
@@ -292,7 +385,7 @@ def simulatedAnne2(takenPos,whiteList,blackList,temperature):
 	minState['White'] = whiteList
 	minState['Black'] = blackList
 	minState['Positions'] = takenPos
-	minState['Cost'] = countThreat1(whiteList) + countThreat1(blackList) - countThreat2(whiteList,blackList)
+	minState['Cost'] = countThreat1(whiteList,takenPos) + countThreat1(blackList,takenPos) - countThreat2(whiteList,blackList,takenPos)
 	for i in range (0,100):
 		# print(i)
 		# print(minState['Cost'])
@@ -317,7 +410,7 @@ def simulatedAnne2(takenPos,whiteList,blackList,temperature):
 				posY = random.randint(0,7)
 			tempPos.append((posX,posY))
 			tempBlack[x].position = (posX,posY)
-		tempV = countThreat1(tempWhite) + countThreat1(tempBlack) - countThreat2(tempWhite,tempBlack)
+		tempV = countThreat1(tempWhite,takenPos) + countThreat1(tempBlack,takenPos) - countThreat2(tempWhite,tempBlack,takenPos)
 		if (tempV < minState['Cost']):
 			minState['White'] = tempWhite
 			minState['Black'] = tempBlack
@@ -365,7 +458,7 @@ def Crossover(ind1,ind2) :
 		else :
 			newInd["White"].append(ind2['White'][i])
 			newInd["Positions"].append(ind2['Positions'][i])
-	newInd['Cost'] = countThreat1(newInd['White'])
+	newInd['Cost'] = countThreat1(newInd['White'],newInd['Positions'])
 	return(newInd)
 
 def Mutation(ind) :
@@ -380,7 +473,7 @@ def Mutation(ind) :
 			tupExist = (t1,t2) in ind['Positions']
 		indTemp['White'][rn].position = (t1,t2)
 		indTemp['Positions'][rn] = (t1,t2)
-		indTemp['Cost'] = countThreat1(indTemp['White'])
+		indTemp['Cost'] = countThreat1(indTemp['White'],indTemp['Positions'])
 		return(indTemp)
 	else :
 		return ind
@@ -399,7 +492,7 @@ def GeneticAlgo1(takenPos,whiteList):
 	obj = {}
 	obj['Positions'] = takenPos
 	obj['White'] = whiteList
-	obj['Cost'] = countThreat1(whiteList)
+	obj['Cost'] = countThreat1(whiteList,takenPos)
 	population = [obj]
 	for i in range(0,3):
 		tempWhite = copy.deepcopy(whiteList)
@@ -410,7 +503,7 @@ def GeneticAlgo1(takenPos,whiteList):
 			tempPos[j] = loc
 		obj['Positions'] = tempPos
 		obj['White'] = tempWhite
-		obj['Cost'] = countThreat1(tempWhite)
+		obj['Cost'] = countThreat1(tempWhite,takenPos)
 		population.append(obj.copy())
 	population.sort(key = lambda i : i['Cost'])
 	return(GenAlgoLvl2(population))
@@ -511,8 +604,8 @@ def Crossover2(ind) :
 					newInd2["Black"].append(ind[k][1]['Black'][i])
 					newInd2["Positions"].append(ind[k][1]['Positions'][i+len(newInd2['White'])])
 
-		newInd1['Cost'] = countThreat1(newInd1['White']) + countThreat1(newInd1['Black']) - countThreat2(newInd1['White'],newInd1['Black'])
-		newInd2['Cost'] = countThreat1(newInd2['White']) + countThreat1(newInd2['Black']) - countThreat2(newInd2['White'],newInd2['Black'])
+		newInd1['Cost'] = countThreat1(newInd1['White'],newInd1['Positions']) + countThreat1(newInd1['Black'],newInd1['Positions']) - countThreat2(newInd1['White'],newInd1['Black'],newInd1['Positions'])
+		newInd2['Cost'] = countThreat1(newInd2['White'],newInd2['Positions']) + countThreat1(newInd2['Black'],newInd2['Positions']) - countThreat2(newInd2['White'],newInd2['Black'],newInd2['Positions'])
 		newInd.append(newInd1)
 		newInd.append(newInd2)
 	#print('cross-overing')
@@ -550,7 +643,7 @@ def Mutation2(ind) :
 			indTemp['Black'][rnBlack].position = (t1,t2)
 			indTemp['Positions'][rnBlack+len(indTemp['White'])] = (t1,t2)
 
-			indTemp['Cost'] = countThreat1(indTemp['White']) + countThreat1(indTemp['Black']) - countThreat2(indTemp['White'], indTemp['Black'])
+			indTemp['Cost'] = countThreat1(indTemp['White'],indTemp['Positions']) + countThreat1(indTemp['Black'],indTemp['Positions']) - countThreat2(indTemp['White'], indTemp['Black'],indTemp['Positions'])
 			#print('mutating 1')
 			#print (len(indTemp['Positions']))
 			mut.append(indTemp)
@@ -587,7 +680,7 @@ def GeneticAlgo2(takenPos,whiteList,blackList):
 	obj['Positions'] = takenPos
 	obj['White'] = whiteList
 	obj['Black'] = blackList
-	obj['Cost'] = countThreat1(whiteList) + countThreat1(blackList) - countThreat2(whiteList,blackList)
+	obj['Cost'] = countThreat1(whiteList,takenPos) + countThreat1(blackList,takenPos) - countThreat2(whiteList,blackList,takenPos)
 	population = [obj]
 
 	#Making new population
@@ -624,7 +717,7 @@ def GeneticAlgo2(takenPos,whiteList,blackList):
 		obj['Positions'] = tempPos
 		obj['White'] = tempWhite
 		obj['Black'] = tempBlack
-		obj['Cost'] = countThreat1(tempWhite) + countThreat1(tempBlack) + countThreat2(tempWhite,tempBlack)
+		obj['Cost'] = countThreat1(tempWhite,takenPos) + countThreat1(tempBlack,takenPos) + countThreat2(tempWhite,tempBlack,takenPos)
 		population.append(obj.copy())
 
 	population.sort(key = lambda i : i['Cost'])
