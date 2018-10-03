@@ -61,10 +61,7 @@ if (method == "1"):
 	result = hillClimbing(takenPos,objListW,objListB)
 
 elif(method == "2"):
-	if (objListB == []):
-		result = simulatedAnne1(takenPos,objListW,0.95)
-	else :
-		result = simulatedAnne2(takenPos,objListW,objListB,0.95)
+	result = simulatedAnnealing(takenPos,objListW,objListB)
 
 elif(method == "3"):
 	result = geneticAlgorithm(takenPos,objListW,objListB)
