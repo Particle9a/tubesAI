@@ -26,5 +26,4 @@ def simulatedAnnealing(takenPos,whiteList,blackList) :
 				change = change +1
 				minState = copy.deepcopy(tempState)
 		temperature = temperature - 1
-	print("Solution :")
-	displayPapan(minState['Positions'], minState['White'],minState['Black'])
+	return minState
