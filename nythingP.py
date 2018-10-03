@@ -432,9 +432,6 @@ def simulatedAnne2(takenPos,whiteList,blackList,temperature):
 def Selection(population):
 	#Create list for pair to mate
 	tupSelection = []
-	#print('we')
-	#print(len(population))
-	#Create 16 Pair (Pupulation/2)
 	for k in range(len(population)//2):
 		tupExist = True
 		while tupExist:
@@ -551,14 +548,6 @@ def Crossover(ind) :
 
 		newInd.append(newInd1)
 		newInd.append(newInd2)
-	#print('cross-overing')
-	#print ('Indice 1')
-	#print (ind1['Positions'])
-	#print ('Indice 2')
-	#print (ind2['Positions'])
-	#print ('New Indice')
-	#print (len(newInd['Positions']))
-	#print (newInd['Positions'])
 	return(newInd)
 
 def Mutation(ind) :
@@ -588,19 +577,9 @@ def Mutation(ind) :
 					indTemp['White'][i].position = (t1,t2)
 				else:
 					indTemp['Black'][i-len(item['White'])].position= (t1,t2)
-		'''
-		tupExist = True
-		while tupExist :
-			t1 = random.SystemRandom().randint(0,7)
-			t2 = random.SystemRandom().randint(0,7)
-			tupExist = (t1,t2) in item['Positions'] or (t1,t2) in indTemp['Positions']
-		indTemp['Black'][rnBlack].position = (t1,t2)
-		indTemp['Positions'][rnBlack+len(indTemp['White'])] = (t1,t2)
-		'''
-		#Recount the cost
+
 		indTemp['Cost'] = countThreat1(indTemp['White'],indTemp['Positions']) + countThreat1(indTemp['Black'],indTemp['Positions']) - countThreat2(indTemp['White'], indTemp['Black'],indTemp['Positions'])
 		mutationList.append(indTemp.copy())
-		#print(len(indTemp['Positions']))
 	return mutationList
 
 
@@ -640,7 +619,6 @@ def GeneticAlgorithm(takenPos,whiteList,blackList):
 		obj['White'] = tempWhite
 		obj['Black'] = tempBlack
 		obj['Cost'] = countThreat1(tempWhite,takenPos) + countThreat1(tempBlack,takenPos) + countThreat2(tempWhite,tempBlack,takenPos)
-		#print(len(set(obj['Positions'])))
 		population.append(obj.copy())
 
 	population.sort(key = lambda i : i['Cost'])
@@ -670,7 +648,7 @@ if (method.lower() == "sa"):
 elif(method.lower() == "ga"):
 	res = GeneticAlgorithm(takenPos,objListW,objListB)
 	displayPapan(res['Positions'],res['White'],res['Black'])
-	print(res['Cost'])
+	print(res['Cost'])it 
 elif(method.lower() == "hc"):
 	if (objListB == []) :
 		hillClimbS1(takenPos,objListW)
