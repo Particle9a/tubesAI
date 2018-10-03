@@ -27,7 +27,7 @@ def findBetterState(takenPos, whiteList,blackList):
 					
 					# Count threats from the new position
 					tempV = countThreat1(tempWhite,takenPos) + countThreat1(blackList,takenPos) - countThreat2(tempWhite,blackList,takenPos)
-					
+				
 					# If the threat cost is less than the current minState, assign new minState with the temporary variables
 					if (tempV < minState['Cost']):
 						minState['Cost'] = tempV
@@ -378,14 +378,29 @@ def GeneticAlgorithm(takenPos,whiteList,blackList):
 
 
 #MAIN PROGRAM
+print('.__   __.      ____    ____ .___________. __    __   __  .__   __.   _______    ')
+print('|  \ |  |      \   \  /   / |           ||  |  |  | |  | |  \ |  |  /  _____|   ')
+print('|   \|  |  _____\   \/   /  `---|  |----`|  |__|  | |  | |   \|  | |  |  __     ')
+print('|  . `  | |______\_    _/       |  |     |   __   | |  | |  . `  | |  | |_ |    ')
+print('|  |\   |          |  |         |  |     |  |  |  | |  | |  |\   | |  |__| |    ')
+print('|__| \__|          |__|         |__|     |__|  |__| |__| |__| \__|  \______|    ')
+print('                                                                                ')
+print('.______   .______        ______   .______    __       _______ .___  ___.        ')
+print('|   _  \  |   _  \      /  __  \  |   _  \  |  |     |   ____||   \/   |        ')
+print('|  |_)  | |  |_)  |    |  |  |  | |  |_)  | |  |     |  |__   |  \  /  |        ')
+print('|   ___/  |      /     |  |  |  | |   _  <  |  |     |   __|  |  |\/|  |        ')
+print('|  |      |  |\  \----.|  `--\'  | |  |_)  | |  `----.|  |____ |  |  |  |        ')
+print('| _|      | _| `._____| \______/  |______/  |_______||_______||__|  |__|        ')
+print('\nby:Liebe Dich')
 
 # Initialization for, position taken by piece, list of white piece and list of black piece
 takenPos = []
 objListW = []
 objListB = []
 
+filename = input("\nEnter the input file name : ")
 # Reading file, and assign the piece to list initialized before
-fil = open('input chess.txt')
+fil = open(filename)
 for inp in fil :
 	inp = inp.split()
 	if (inp[0] == 'WHITE'):
@@ -407,9 +422,15 @@ for inp in fil :
 			objListB.append(Pion(inp[1],posX,posY))
 			takenPos.append((posX,posY))
 
+print('File loaded successfully!\n')
+print('== Method List ==')
+print('1.Hill Climbing')
+print('2.Simulated Annealing')
+print('3.Genetic Algorithm\n')
+
 #Algorithm
-method = input("Enter the method you want : ")
-if (method.lower() == "sa"):
+method = input("Choose the local search method : ")
+if (method == "1"):
 	if (objListB == []):
 		res = simulatedAnne1(takenPos,objListW,0.95)
 		displayPapan(res['Positions'],res['White'],[])
@@ -417,10 +438,10 @@ if (method.lower() == "sa"):
 		res = simulatedAnne2(takenPos,objListW,objListB,0.95)
 		displayPapan(res['Positions'],res['White'],res['Black'])
 
-elif(method.lower() == "ga"):
+elif(method == "2"):
 	result = GeneticAlgorithm(takenPos,objListW,objListB)
 	
-elif(method.lower() == "hc"):
+elif(method() == "3"):
 	result = hillClimbing(takenPos,objListW,objListB)
 
 displayPapan(result['Positions'],result['White'],result['Black'])
