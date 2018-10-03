@@ -52,7 +52,7 @@ def simulatedAnnealing(takenPos,whiteList,blackList) :
 	#Initialize temperature
 	temperature = 100
 	while (temperature > 0):
-		#Make a random state
+		#Make a successor state
 		tempState = findBetterState(minState['Positions'], minState['White'], minState['Black'])
 		#Compare with current state
 		if (tempState['Cost'] < minState['Cost']):
