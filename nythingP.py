@@ -319,7 +319,7 @@ def Mutation(ind) :
 		mutationList.append(indTemp.copy())
 	return mutationList
 
-def GeneratePopulation(takenPos,whiteList,blackList):
+def generatePopulation(takenPos,whiteList,blackList):
 	#Making Population Object
 	obj = {}
 	obj['Positions'] = takenPos
@@ -360,9 +360,9 @@ def GeneratePopulation(takenPos,whiteList,blackList):
 	population.sort(key = lambda i : i['Cost'])
 	return population
 
-def GeneticAlgorithm(takenPos,whiteList,blackList):
+def geneticAlgorithm(takenPos,whiteList,blackList):
 	#Make population
-	population = GeneratePopulation(takenPos,whiteList,blackList)
+	population = generatePopulation(takenPos,whiteList,blackList)
 
 	#Process
 	for i in range(111):
@@ -431,17 +431,15 @@ print('3.Genetic Algorithm\n')
 #Algorithm
 method = input("Choose the local search method : ")
 if (method == "1"):
-	if (objListB == []):
-		res = simulatedAnne1(takenPos,objListW,0.95)
-		displayPapan(res['Positions'],res['White'],[])
-	else :
-		res = simulatedAnne2(takenPos,objListW,objListB,0.95)
-		displayPapan(res['Positions'],res['White'],res['Black'])
+	result = hillClimbing(takenPos,objListW,objListB)
 
 elif(method == "2"):
-	result = GeneticAlgorithm(takenPos,objListW,objListB)
+	if (objListB == []):
+		result = simulatedAnne1(takenPos,objListW,0.95)
+	else :
+		result = simulatedAnne2(takenPos,objListW,objListB,0.95)
 	
 elif(method() == "3"):
-	result = hillClimbing(takenPos,objListW,objListB)
+	result = geneticAlgorithm(takenPos,objListW,objListB)
 
 displayPapan(result['Positions'],result['White'],result['Black'])
