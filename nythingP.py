@@ -241,6 +241,11 @@ def printThreat2(whiteList,blackList,listPos):
 			if y.isThreatenedBy(x,listPos):
 				print(x.position, "attack", y.position)
 
+def displayThreat2(whiteList,blackList,listPos):
+	samePieceThreat = str(countThreat1(whiteList,listPos)+countThreat1(blackList,listPos))
+	diffPieceThreat = str(countThreat2(whiteList,blackList,listPos))
+	print( samePieceThreat + " " + diffPieceThreat )
+
 # HILL CLIMBING ALGORITHM
 def hillClimb1(takenPos, whiteList):
 	minState = {}
@@ -638,17 +643,19 @@ method = input("Enter the method you want : ")
 #MAIN PROGRAM
 if (method.lower() == "sa"):
 	if (objListB == []):
-		res = simulatedAnne1(takenPos,objListW,0.95)
-		displayPapan(res['Positions'],res['White'],[])
-		print(res['Cost'])
+		result = simulatedAnne1(takenPos,objListW,0.95)
+		displayPapan(result['Positions'],result['White'],[])
+		print(result['Cost'])
 	else :
-		res = simulatedAnne2(takenPos,objListW,objListB,0.95)
-		displayPapan(res['Positions'],res['White'],res['Black'])
-		print(res['Cost'])
+		result = simulatedAnne2(takenPos,objListW,objListB,0.95)
+		displayPapan(result['Positions'],result['White'],result['Black'])
+		print(result['Cost'])
+
 elif(method.lower() == "ga"):
-	res = GeneticAlgorithm(takenPos,objListW,objListB)
-	displayPapan(res['Positions'],res['White'],res['Black'])
-	print(res['Cost'])
+	result = GeneticAlgorithm(takenPos,objListW,objListB)
+	displayPapan(result['Positions'],result['White'],result['Black'])
+	displayThreat2(result['White'],result['Black'],result['Positions'])
+
 elif(method.lower() == "hc"):
 	if (objListB == []) :
 		hillClimbS1(takenPos,objListW)
