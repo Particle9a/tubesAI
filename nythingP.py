@@ -648,7 +648,7 @@ if (method.lower() == "sa"):
 elif(method.lower() == "ga"):
 	res = GeneticAlgorithm(takenPos,objListW,objListB)
 	displayPapan(res['Positions'],res['White'],res['Black'])
-	print(res['Cost'])it 
+	print(res['Cost'])
 elif(method.lower() == "hc"):
 	if (objListB == []) :
 		hillClimbS1(takenPos,objListW)
