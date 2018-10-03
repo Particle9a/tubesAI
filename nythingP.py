@@ -51,7 +51,6 @@ def isBlockedV(pos1,pos2,listpos):
 			return False 
 	return False
 
-
 def isBlockedH(pos1,pos2,listpos):
 	x1,y1 = pos1
 	x2,y2 = pos2
@@ -176,7 +175,6 @@ for inp in fil :
 				posY = random.randint(0,7)
 			objListB.append(Pion(inp[1],posX,posY))
 			takenPos.append((posX,posY))
-
 print(takenPos)
 
 # DISPLAY FUNCTION 
@@ -224,7 +222,6 @@ def displayPapan(takenPos, whiteList, blackList) :
 			print()
 		print("Threats (different color) =")	
 		printThreat2(whiteList,blackList,takenPos)
-		
 
 # THREAT (ENERGY) Counter
 def countThreat1(whiteList,listPos):
@@ -328,7 +325,7 @@ def hillClimbS1(takenPos,whiteList) :
 			minState = tempState
 			betterExist = True
 	print("Solution :")
-	displayPapan(minState['Positions'], minState['White'],[])	
+	displayPapan(minState['Positions'], minState['White'],[])
 
 def hillClimbS2(takenPos,whiteList,blackList) :
 	minState = {}
@@ -437,93 +434,10 @@ def simulatedAnne2(takenPos,whiteList,blackList,temperature):
 	return minState
 
 #GENETIC ALGORITHM
-def Selection(population):
-	probList = []
-	pops = copy.copy(population)
-	maxThreat = 30
-	sumEn = sum((maxThreat - item['Cost']) for item in population)
-	for x in population :
-		prob = (maxThreat - x['Cost'])/sumEn
-		probList.append(prob)
-	t1 = numpy.random.choice(population,p = probList)
-	pops.remove(t1)
-	sumEn = sum((maxThreat - item['Cost']) for item in pops)
-	probList = []
-	for x in pops :
-		prob = (maxThreat - x['Cost'])/sumEn
-		probList.append(prob)
-	t2 = numpy.random.choice(pops,p =probList)
-	return(t1,t2)
-
-def Crossover(ind1,ind2) :
-	newInd = {}
-	newInd["White"] = []
-	newInd["Positions"] = []
-	for i in range(0,len(ind1['White'])):
-		rn = random.SystemRandom().randint(0,1)
-		if(rn == 0):
-			newInd["White"].append(ind1['White'][i])
-			newInd["Positions"].append(ind1['Positions'][i])
-		else :
-			newInd["White"].append(ind2['White'][i])
-			newInd["Positions"].append(ind2['Positions'][i])
-	newInd['Cost'] = countThreat1(newInd['White'],newInd['Positions'])
-	return(newInd)
-
-def Mutation(ind) :
-	mutate = numpy.random.choice([True,False],p = [0.3,0.7])
-	if mutate :
-		indTemp = copy.deepcopy(ind)
-		rn = random.SystemRandom().randint(0,len(indTemp['White'])-1)
-		tupExist = True
-		while tupExist :
-			t1 = random.SystemRandom().randint(0,7)
-			t2 = random.SystemRandom().randint(0,7)
-			tupExist = (t1,t2) in ind['Positions']
-		indTemp['White'][rn].position = (t1,t2)
-		indTemp['Positions'][rn] = (t1,t2)
-		indTemp['Cost'] = countThreat1(indTemp['White'],indTemp['Positions'])
-		return(indTemp)
-	else :
-		return ind
-
-def GenAlgoLvl2(population):
-	if(len(population) > 977):
-		minVal  = population[0]
-		for x in population :
-			if (minVal['Cost'] > x['Cost']) :
-				minVal = x
-		return(minVal)
-	else :
-		return(GenAlgoLvl2(population + [Mutation(Crossover(*Selection(population)))]))
-
-def GeneticAlgo1(takenPos,whiteList):
-	obj = {}
-	obj['Positions'] = takenPos
-	obj['White'] = whiteList
-	obj['Cost'] = countThreat1(whiteList,takenPos)
-	population = [obj]
-	for i in range(0,3):
-		tempWhite = copy.deepcopy(whiteList)
-		tempPos = copy.deepcopy(takenPos)
-		for j in range(0,len(whiteList)):
-			loc = (random.SystemRandom().randint(0,7),random.SystemRandom().randint(0,7))
-			tempWhite[j].position = loc
-			tempPos[j] = loc
-		obj['Positions'] = tempPos
-		obj['White'] = tempWhite
-		obj['Cost'] = countThreat1(tempWhite,takenPos)
-		population.append(obj.copy())
-	population.sort(key = lambda i : i['Cost'])
-	return(GenAlgoLvl2(population))
-
 #Return two breed from population to mate
-def Selection2(population):
+def Selection(population):
 	#Create list for pair to mate
 	tupSelection = []
-	#print('we')
-	#print(len(population))
-	#Create 16 Pair (Pupulation/2)
 	for k in range(len(population)//2):
 		tupExist = True
 		while tupExist:
@@ -559,7 +473,7 @@ def Selection2(population):
 				tupSelection.append(tup)
 	return tupSelection
 
-def Crossover2(ind) :
+def Crossover(ind) :
 	#Make list of new breed
 	newInd = []
 	for tup in ind:
@@ -640,17 +554,9 @@ def Crossover2(ind) :
 
 		newInd.append(newInd1)
 		newInd.append(newInd2)
-	#print('cross-overing')
-	#print ('Indice 1')
-	#print (ind1['Positions'])
-	#print ('Indice 2')
-	#print (ind2['Positions'])
-	#print ('New Indice')
-	#print (len(newInd['Positions']))
-	#print (newInd['Positions'])
 	return(newInd)
 
-def Mutation2(ind) :
+def Mutation(ind) :
 	#making list of mutated breed
 	mutationList = []
 	#print('mutating')
@@ -677,35 +583,12 @@ def Mutation2(ind) :
 					indTemp['White'][i].position = (t1,t2)
 				else:
 					indTemp['Black'][i-len(item['White'])].position= (t1,t2)
-		'''
-		tupExist = True
-		while tupExist :
-			t1 = random.SystemRandom().randint(0,7)
-			t2 = random.SystemRandom().randint(0,7)
-			tupExist = (t1,t2) in item['Positions'] or (t1,t2) in indTemp['Positions']
-		indTemp['Black'][rnBlack].position = (t1,t2)
-		indTemp['Positions'][rnBlack+len(indTemp['White'])] = (t1,t2)
-		'''
-		#Recount the cost
+
 		indTemp['Cost'] = countThreat1(indTemp['White'],indTemp['Positions']) + countThreat1(indTemp['Black'],indTemp['Positions']) - countThreat2(indTemp['White'], indTemp['Black'],indTemp['Positions'])
 		mutationList.append(indTemp.copy())
-		#print(len(indTemp['Positions']))
 	return mutationList
 
-def GenAlgoLvl22(population,iteration):
-	iteration+=1
-	if(iteration>100): #Enough population has been made, return the minimum value
-		minVal  = population[0]
-		for x in population :
-			if (minVal['Cost'] > x['Cost']) and len(set(x['Positions'])) == len(x['Positions']): #If the cost of x is less than min value, assign x as new minValue
-				minVal = x
-
-		return minVal	
-	else : 
-		#print('computing')
-		return(GenAlgoLvl22(Mutation2(Crossover2(Selection2(population))),iteration))
-
-def GeneticAlgo2(takenPos,whiteList,blackList):
+def GeneticAlgorithm(takenPos,whiteList,blackList):
 	#Making Population Object
 	obj = {}
 	obj['Positions'] = takenPos
@@ -741,14 +624,20 @@ def GeneticAlgo2(takenPos,whiteList,blackList):
 		obj['White'] = tempWhite
 		obj['Black'] = tempBlack
 		obj['Cost'] = countThreat1(tempWhite,takenPos) + countThreat1(tempBlack,takenPos) + countThreat2(tempWhite,tempBlack,takenPos)
-		#print(len(set(obj['Positions'])))
 		population.append(obj.copy())
 
 	population.sort(key = lambda i : i['Cost'])
-	#print(population)
-	#print('Panjang populs')
-	#print(len(population))
-	return(GenAlgoLvl22(population,0))
+
+	#Mutate
+	for i in range(111):
+		population = Mutation(Crossover(Selection(population)))
+
+	minVal  = population[0]
+	for x in population :
+		if (minVal['Cost'] > x['Cost']) and len(set(x['Positions'])) == len(x['Positions']): #If the cost of x is less than min value, assign x as new minValue
+			minVal = x
+
+	return minVal	
 
 method = input("Enter the method you want : ")
 #MAIN PROGRAM
@@ -759,13 +648,11 @@ if (method.lower() == "sa"):
 	else :
 		res = simulatedAnne2(takenPos,objListW,objListB,0.95)
 		displayPapan(res['Positions'],res['White'],res['Black'])
+
 elif(method.lower() == "ga"):
-	if (objListB == []):
-		res = GeneticAlgo1(takenPos,objListW)
-		displayPapan(res['Positions'],res['White'],[])
-	else :
-		res = GeneticAlgo2(takenPos,objListW,objListB)
-		displayPapan(res['Positions'],res['White'],res['Black'])
+	result = GeneticAlgorithm(takenPos,objListW,objListB)
+	displayPapan(result['Positions'],result['White'],result['Black'])
+	
 elif(method.lower() == "hc"):
 	if (objListB == []) :
 		hillClimbS1(takenPos,objListW)
