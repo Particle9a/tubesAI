@@ -22,7 +22,10 @@ def Selection(population):
 			sumEn = sum((maxThreat - item['Cost']) for item in population) #Sum of delta of conflict 
 			probList = []
 			for x in population :
-				prob = (maxThreat - x['Cost'])/sumEn
+				if (sumEn!=0):
+					prob = (maxThreat - x['Cost'])/sumEn
+				else :
+					prob = 1/len(population)
 				probList.append(prob)
 
 			#Choose tuple according to probability
@@ -33,7 +36,10 @@ def Selection(population):
 			sumEn = sum((maxThreat - item['Cost']) for item in pops)
 			probList = []
 			for x in pops :
-				prob = (maxThreat - x['Cost'])/sumEn
+				if (sumEn!=0):
+					prob = (maxThreat - x['Cost'])/sumEn
+				else :
+					prob = 1/len(pops)
 				probList.append(prob)
 
 			#Choose tuple
@@ -140,7 +146,7 @@ def Mutation(ind) :
 
 		#Iterating over each piece position
 		for i in range(len(item['Positions'])):
-			mutate = numpy.random.choice([True,False],p = [0.1,0.9]) #Randomizer to decide to mutate or not
+			mutate = numpy.random.choice([True,False],p = [0.05,0.95]) #Randomizer to decide to mutate or not
 			if mutate or indTemp['Positions'].count(indTemp['Positions'][i]) > 1: #Mutate the piece position according to randomizer above OR if it has duplicate on the list
 
 				#Creating mutated position
@@ -199,8 +205,6 @@ def generatePopulation(takenPos,whiteList,blackList):
 		obj['Black'] = tempBlack
 		obj['Cost'] = countThreat1(tempWhite,takenPos) + countThreat1(tempBlack,takenPos) + countThreat2(tempWhite,tempBlack,takenPos)
 		population.append(obj.copy())
-
-	population.sort(key = lambda i : i['Cost'])
 	return population
 
 def geneticAlgorithm(takenPos,whiteList,blackList):
@@ -208,8 +212,12 @@ def geneticAlgorithm(takenPos,whiteList,blackList):
 	population = generatePopulation(takenPos,whiteList,blackList)
 
 	#Process
-	for i in range(111):
-		population = Mutation(Crossover(Selection(population)))
+	for i in range(100):
+		newPopulation = Mutation(Crossover(Selection(population)))
+
+		population.sort(key = lambda i : i['Cost'])
+		newPopulation.sort(key = lambda i : i['Cost'])
+		population[31] = newPopulation[0].copy()	
 
 	#Choose the best breed
 	minVal  = population[0]
