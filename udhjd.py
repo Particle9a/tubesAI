@@ -6,73 +6,89 @@ import numpy
 from chess import isHAligned, isVAligned, isDAligned, isBlockedV, isBlockedH, isBlockedD, isHorseAligned, Pion, displayPapan, countThreat1, countThreat2, printThreat1, printThreat2
 
 # HILL CLIMBING ALGORITHM
-def findBetterState(takenPos, whiteList,blackList):
-	# Initialize minState from 
+def hillClimb1(takenPos, whiteList):
 	minState = {}
-	minState['Cost'] = countThreat1(whiteList,takenPos) + countThreat1(blackList,takenPos) - countThreat2(whiteList,blackList,takenPos)
-	minState['White'] = whiteList
-	minState['Black'] = blackList
-
-	# Iteration in white pion list to find a better assignment
+	minState['Cost'] = countThreat1(whiteList,takenPos)
 	for x in range(0,len(whiteList)) :
-		# Iterate a and b to find new position
 		for a in range(0,8):
 			for b in range(0,8):
 				if ((a,b) not in takenPos):
-					# Make new temporary variable of position and white pion list, with position that haven't been taken
 					tempPos = copy.deepcopy(takenPos)
 					tempWhite = copy.deepcopy(whiteList)
 					tempWhite[x].position = (a,b)
 					tempPos[x] = (a,b)
-					
-					# Count threats from the new position
-					tempV = countThreat1(tempWhite,takenPos) + countThreat1(blackList,takenPos) - countThreat2(tempWhite,blackList,takenPos)
-					
-					# If the threat cost is less than the current minState, assign new minState with the temporary variables
+					tempV = countThreat1(tempWhite,takenPos)
 					if (tempV < minState['Cost']):
 						minState['Cost'] = tempV
 						minState['Positions'] = tempPos
 						minState['White'] = tempWhite
-
-	# Iteration in black pion list to find a better assignment
-	for x in range(0,len(blackList)) :
-		# Iterate a and b to find new position
+	return(minState)
+	
+def hillClimb2(takenPos, whiteList,blackList):
+	minState = {}
+	minState['Cost'] = countThreat1(whiteList,takenPos) + countThreat1(blackList,takenPos) - countThreat2(whiteList,blackList,takenPos)
+	minState['White'] = whiteList
+	minState['Black'] = blackList
+	for x in range(0,len(whiteList)) :
 		for a in range(0,8):
 			for b in range(0,8):
 				if ((a,b) not in takenPos):
-					# Make new temporary variable of position and black pion list, with position that haven't been taken
+					tempPos = copy.deepcopy(takenPos)
+					tempWhite = copy.deepcopy(whiteList)
+					tempWhite[x].position = (a,b)
+					tempPos[x] = (a,b)
+					tempV = countThreat1(tempWhite,takenPos) + countThreat1(blackList,takenPos) - countThreat2(tempWhite,blackList,takenPos)
+					if (tempV < minState['Cost']):
+						minState['Cost'] = tempV
+						minState['Positions'] = tempPos
+						minState['White'] = tempWhite
+	for x in range(0,len(blackList)) :
+		for a in range(0,8):
+			for b in range(0,8):
+				if ((a,b) not in takenPos):
 					tempPos = copy.deepcopy(takenPos)
 					tempBlack = copy.deepcopy(blackList)
 					tempBlack[x].position = (a,b)
 					tempPos[x + len(whiteList)] = (a,b)
-					
-					# Count threats from the new position
 					tempV = countThreat1(tempWhite,takenPos) + countThreat1(tempBlack,takenPos) - countThreat2(whiteList, tempBlack,takenPos)
-					
-					# If the threat cost is less than the current minState, assign new minState with the temporary variables
 					if (tempV < minState['Cost']):
 						minState['Cost'] = tempV
 						minState['Positions'] = tempPos
 						minState['Black'] = tempBlack
 	return(minState)
 
-def hillClimbing(takenPos,whiteList,blackList) :
-	# Initialize minState
+def hillClimbS1(takenPos,whiteList) :
+	minState = {}
+	minState['Positions'] = copy.deepcopy(takenPos)
+	minState['White'] = copy.deepcopy(whiteList)
+	minState['Cost'] = countThreat1(whiteList,takenPos)
+	betterExist = True
+	while betterExist :
+		betterExist = False
+		# os.system('cls')
+		tempState = hillClimb1(minState['Positions'],minState['White'])
+		if (tempState['Cost'] < minState['Cost']):
+			minState = tempState
+			betterExist = True
+	print("Solution :")
+	displayPapan(minState['Positions'], minState['White'],[])
+
+def hillClimbS2(takenPos,whiteList,blackList) :
 	minState = {}
 	minState['Positions'] = copy.deepcopy(takenPos)
 	minState['White'] = copy.deepcopy(whiteList)
 	minState['Black'] = copy.deepcopy(blackList)
 	minState['Cost'] = countThreat1(whiteList,takenPos) + countThreat1(blackList,takenPos) - countThreat2(whiteList,blackList,takenPos)
-	
-	# If there is better state, algorithm keep finding a better state
 	betterExist = True
 	while betterExist :
-		tempState = findBetterState(minState['Positions'], minState['White'], minState['Black'])
+		betterExist = False
+		# os.system('cls')
+		tempState = hillClimb2(minState['Positions'], minState['White'], minState['Black'])
 		if (tempState['Cost'] < minState['Cost']):
 			minState = tempState
-		else : 
-			betterExist = False
-	return minState
+			betterExist = True
+	print("Solution :")
+	displayPapan(minState['Positions'], minState['White'],minState['Black'])
 
 # SIMULATED ANNEALING ALGORITHM
 def simulatedAnne1(takenPos,whiteList,temperature):
@@ -419,8 +435,14 @@ if (method.lower() == "sa"):
 
 elif(method.lower() == "ga"):
 	result = GeneticAlgorithm(takenPos,objListW,objListB)
+	displayPapan(result['Positions'],result['White'],result['Black'])
 	
 elif(method.lower() == "hc"):
-	result = hillClimbing(takenPos,objListW,objListB)
-
-displayPapan(result['Positions'],result['White'],result['Black'])
+	if (objListB == []) :
+		hillClimbS1(takenPos,objListW)
+	elif (objListW == []) :
+		hillClimbS1(takenPos,objListB)
+	else :
+		hillClimbS2(takenPos,objListW,objListB)	
+else : # by default use hill climbing (bonus)
+	hillClimbS2(takenPos,objListW,objListB)
