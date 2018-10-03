@@ -330,11 +330,12 @@ def Mutation(ind) :
 				else:
 					indTemp['Black'][i-len(item['White'])].position= (t1,t2)
 
+		#Re-calculate cost
 		indTemp['Cost'] = countThreat1(indTemp['White'],indTemp['Positions']) + countThreat1(indTemp['Black'],indTemp['Positions']) - countThreat2(indTemp['White'], indTemp['Black'],indTemp['Positions'])
 		mutationList.append(indTemp.copy())
 	return mutationList
 
-def GeneticAlgorithm(takenPos,whiteList,blackList):
+def GeneratePopulation(takenPos,whiteList,blackList):
 	#Making Population Object
 	obj = {}
 	obj['Positions'] = takenPos
@@ -343,7 +344,7 @@ def GeneticAlgorithm(takenPos,whiteList,blackList):
 	obj['Cost'] = countThreat1(whiteList,takenPos) + countThreat1(blackList,takenPos) - countThreat2(whiteList,blackList,takenPos)
 	population = [obj]
 
-	#Making new population
+	#Making new state
 	for i in range(31):
 		tempWhite = copy.deepcopy(whiteList)
 		tempBlack = copy.deepcopy(blackList)
@@ -373,11 +374,17 @@ def GeneticAlgorithm(takenPos,whiteList,blackList):
 		population.append(obj.copy())
 
 	population.sort(key = lambda i : i['Cost'])
+	return population
 
-	#Mutate
+def GeneticAlgorithm(takenPos,whiteList,blackList):
+	#Make population
+	population = GeneratePopulation(takenPos,whiteList,blackList)
+
+	#Process
 	for i in range(111):
 		population = Mutation(Crossover(Selection(population)))
 
+	#Choose the best breed
 	minVal  = population[0]
 	for x in population :
 		if (minVal['Cost'] > x['Cost']) and len(set(x['Positions'])) == len(x['Positions']): #If the cost of x is less than min value, assign x as new minValue
@@ -386,7 +393,7 @@ def GeneticAlgorithm(takenPos,whiteList,blackList):
 	return minVal	
 
 
-#MAIN METHOD
+#MAIN PROGRAM
 
 # Initialization for, position taken by piece, list of white piece and list of black piece
 takenPos = []
@@ -415,12 +422,9 @@ for inp in fil :
 				posY = random.randint(0,7)
 			objListB.append(Pion(inp[1],posX,posY))
 			takenPos.append((posX,posY))
-print(takenPos)
-
 
 #Algorithm
 method = input("Enter the method you want : ")
-#MAIN PROGRAM
 if (method.lower() == "sa"):
 	if (objListB == []):
 		res = simulatedAnne1(takenPos,objListW,0.95)
