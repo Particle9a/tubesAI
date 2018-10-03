@@ -12,18 +12,15 @@ def simulatedAnnealing(takenPos,whiteList,blackList) :
 	minState['White'] = copy.deepcopy(whiteList)
 	minState['Black'] = copy.deepcopy(blackList)
 	minState['Cost'] = countThreat1(whiteList,takenPos) + countThreat1(blackList,takenPos) - countThreat2(whiteList,blackList,takenPos)
-	temperature = 50
-	change = 0
+	temperature = 100
 	while (temperature > 0):
 		tempState = findBetterState(minState['Positions'], minState['White'], minState['Black'])
 		if (tempState['Cost'] < minState['Cost']):
-			change = change+1
 			minState = copy.deepcopy(tempState)
 		else:
 			probFactor = numpy.exp((minState['Cost']-tempState['Cost'])/temperature)
 			change = numpy.random.choice([True,False], p = [probFactor,1-probFactor])
 			if (change):
-				change = change +1
 				minState = copy.deepcopy(tempState)
-		temperature = temperature - 1
+		temperature = temperature - 2
 	return minState
