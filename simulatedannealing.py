@@ -3,43 +3,9 @@ import copy
 import os
 import numpy
 from hillclimbing import findBetterState
-from chess import isHAligned, isVAligned, isDAligned, isBlockedV, isBlockedH, isBlockedD, isHorseAligned, displayPapan, countThreat1, countThreat2, printThreat1, printThreat2
+from chess import isHAligned, isVAligned, isDAligned, isBlockedV, isBlockedH, isBlockedD, isHorseAligned, displayPapan, countThreat1, countThreat2
 
 # SIMULATED ANNEALING ALGORITHM
-
-#Randomize position
-def randomize(takenPos,whiteList,blackList):
-	#Initialize result
-	result = {}
-	result['Positions'] = []
-	result['White'] = copy.deepcopy(whiteList)
-	result['Black'] = copy.deepcopy(blackList)
-
-	#Randomize white pion
-	for x in range(0,len(whiteList)):
-		posX = random.randint(0,7)
-		posY = random.randint(0,7)
-		#Make sure no double positions
-		while ((posX,posY) in result['Positions']):
-			posX = random.randint(0,7)
-			posY = random.randint(0,7)
-		result['Positions'].append((posX,posY))
-		result['White'][x].position = (posX,posY)
-
-	#Randomize black pion
-	for x in range(0,len(blackList)):
-		posX = random.randint(0,7)
-		posY = random.randint(0,7)
-		#Make sure no double positions
-		while ((posX,posY) in result['Positions']):
-			posX = random.randint(0,7)
-			posY = random.randint(0,7)
-		result['Positions'].append((posX,posY))
-		result['Black'][x].position = (posX,posY)
-
-	#Calculate threat
-	result['Cost'] = countThreat1(result['White'],result['Positions']) + countThreat1(result['Black'],result['Positions']) - countThreat2(result['White'],result['Black'],result['Positions'])
-	return result
 
 # Main function of Simulated Annealing Algorithm
 def simulatedAnnealing(takenPos,whiteList,blackList) :

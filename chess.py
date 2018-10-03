@@ -190,19 +190,3 @@ def countThreat2(whiteList,blackList,listPos):
 			if y.isThreatenedBy(x,listPos) :
 				count += 1
 	return count
-
-# THREAT POSISITION
-def printThreat1(whiteList,listPos):
-	for x in whiteList :
-		for y in whiteList :
-			if (x != y) :
-				if x.isThreatenedBy(y,listPos) :
-					print(y.position,"attack", x.position)
-
-def printThreat2(whiteList,blackList,listPos):
-	for x in whiteList:
-		for y in blackList:
-			if x.isThreatenedBy(y,listPos):
-				print(y.position, "attack", x.position)
-			if y.isThreatenedBy(x,listPos):
-				print(x.position, "attack", y.position)
