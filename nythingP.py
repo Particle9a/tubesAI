@@ -1,5 +1,5 @@
 from hillclimbing import hillClimbing
-from simulatedannealing import simulatedAnne1, simulatedAnne2
+from simulatedannealing import simulatedAnnealing
 from geneticalgorithm import geneticAlgorithm
 from chess import Pion, displayPapan
 import random

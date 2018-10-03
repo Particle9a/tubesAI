@@ -14,6 +14,7 @@ def findBetterState(takenPos, whiteList,blackList):
 	minState['Cost'] = countThreat1(whiteList,takenPos) + countThreat1(blackList,takenPos) - countThreat2(whiteList,blackList,takenPos)
 	minState['White'] = whiteList
 	minState['Black'] = blackList
+	minState['Positions'] = takenPos
 
 	# Iteration in white pion list to find a better assignment
 	for x in range(0,len(whiteList)) :
