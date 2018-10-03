@@ -34,8 +34,11 @@ def findBetterState(takenPos, whiteList,blackList):
 					# If the threat cost is less than the current minState, assign new minState with the temporary variables
 					if (tempV < minState['Cost']):
 						minState['Cost'] = tempV
-						minState['Positions'] = tempPos
-						minState['White'] = tempWhite
+						minState['Positions'] = tempPos.copy()
+						minState['White'] = tempWhite.copy()
+						takenPos = tempPos.copy()
+						whiteList = tempWhite.copy()
+
 
 	# Iteration in black pion list to find a better assignment
 	for x in range(0,len(blackList)) :
@@ -55,8 +58,9 @@ def findBetterState(takenPos, whiteList,blackList):
 					# If the threat cost is less than the current minState, assign new minState with the temporary variables
 					if (tempV < minState['Cost']):
 						minState['Cost'] = tempV
-						minState['Positions'] = tempPos
-						minState['Black'] = tempBlack
+						minState['Positions'] = tempPos.copy()
+						minState['Black'] = tempBlack.copy()
+
 	return(minState)
 
 # Return the minimum threat state
